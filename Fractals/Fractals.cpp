@@ -4,6 +4,7 @@
 /* Headers */ 
 void test();
 double borneDansIntervalle(const double valeurABorner, const double borneInferieure, const double borneSuperieure);
+bool estDansIntervalle(const double valeurABorner, const double borneInferieure, const double borneSuperieure);
 
 int main()
 {	
@@ -17,7 +18,7 @@ int main()
 /* Function that calls all other tests */
 void test()
 {
-	std::cout << "Starting tests..." << std::endl;
+	std::cout << "Starting tests..." << std::endl << std::endl;
 
 	int valeurABornerInferieure = -1;
 	int valeurABornerSuperieure = 4;
@@ -31,6 +32,16 @@ void test()
 	{
 		std::cout << borneDansIntervalle(static_cast<double>(i), borneInferieure, borneSuperieure) << " ";
 	}
+	std::cout << std::endl << std::endl;
+
+	std::cout << "Testing estDansIntervalle: " << std::endl;
+	std::cout << "Expected values: false false true true true false or 0 0 1 1 1" << std::endl;
+	std::cout << "Test values    : ";
+	for (int i = valeurABornerInferieure; i <= valeurABornerSuperieure; i++)
+	{
+		std::cout << std::boolalpha << estDansIntervalle(static_cast<double>(i), borneInferieure, borneSuperieure) << " ";
+	}
+	std::cout << std::endl << std::endl;
 
 }
 
@@ -46,4 +57,18 @@ double borneDansIntervalle(const double valeurABorner,const double borneInferieu
 	if (valeurABorner < borneInferieure) return borneInferieure;
 	if (valeurABorner > borneSuperieure) return borneSuperieure;
 	return valeurABorner;	
+}
+
+//! Check if the valeurABorner is inside the given interval
+	/*!
+	  \param valeurABorner the value to verify if are contained in the interval.
+	  \param borneInferieure interval inclusive lower limit.
+	  \param borneSuperieure interval inclusive upper limit.
+	  \return true when the valeurABorner is inside the given interval, false otherwise.
+	*/
+bool estDansIntervalle(const double valeurABorner, const double borneInferieure, const double borneSuperieure)
+{
+	if (valeurABorner < borneInferieure) return false;
+	if (valeurABorner > borneSuperieure) return false;
+	return true;
 }
