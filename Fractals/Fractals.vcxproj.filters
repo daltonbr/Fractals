@@ -14,4 +14,31 @@
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="ecrireimage.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="..\..\Fractals-Docs\Fichiers\Golden dragon.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="..\..\Fractals-Docs\Fichiers\Heighway dragon.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="..\..\Fractals-Docs\Fichiers\Sierpensky triangle.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="..\..\Fractals-Docs\Fichiers\Barnsley fern.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="..\..\Fractals-Docs\Fichiers\Golden dragon agrandi.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Fractals.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
 </Project>
