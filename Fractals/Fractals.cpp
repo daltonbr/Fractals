@@ -6,6 +6,7 @@
 #include <sstream>
 #include <string>
 #include <istream>
+#include <ostream>
 
 using namespace std;
 
@@ -44,12 +45,13 @@ bool estDansIntervalle(const double valeurABorner, const double borneInferieure,
 void dessinePoint(const double x, const double y, const Pixel intensite, Pixel image[][tailleY]);
 double aleatoireZeroUn();
 int aleatoireSelonDistribution(const double *probabilitesCumulatives, int size);
-Point2d transformePoint(const double x, const double y, const double *transformation);
+//Point2d transformePoint(const double x, const double y, const double *transformation);
+void transformePoint(double &x, double &y, const double *transformation);
 void calculerImage();
 
 /* Auxiliary methods */
-void ReadImageDataFromFile(const string fileName, image &image);
-void PrintImageData(image imageToPrint);
+void readImageDataFromFile(const string fileName, image &image);
+void printImageData(image imageToPrint);
 
 
 int main()
@@ -133,7 +135,10 @@ void test()
 	// Test transformePoint
 	cout << " << Testing transformePoint >>" << endl;
 	double transformation[] = { 0.5, -0.5, 0.25, 0.75, 2.0, 3.0 };
-	Point2d point = transformePoint(0.2, 0.7, transformation);
+	Point2d point;
+	point.x = 0.2;
+	point.y = 0.7;
+	transformePoint(point.x, point.y, transformation);
 	cout << "Expected values: x: 1.75, y: 3.575 " << endl;
 	cout << "Test values    : x: " << point.x << ", y: " << point.y << endl;
 }
@@ -215,28 +220,82 @@ int aleatoireSelonDistribution(const double *probabilitesCumulatives, int size)
 	  \param *transformation un tableau de transformation, it needs to be [3x2], 6 elements
 	  \return returns the transformated point
 	*/
-Point2d transformePoint(const double x, const double y, const double *transformation)
-{	
-	Point2d point;
-	point.x = (transformation[0] * x + transformation[1] * y) + transformation[4];
-	point.y = (transformation[2] * x + transformation[3] * y) + transformation[5];
-	return point;
+
+void transformePoint(double &x, double &y, const double *transformation)
+{
+	//Point2d point;
+	double initialX = x;
+	double initialY = y;
+	x = (transformation[0] * initialX + transformation[1] * initialY) + transformation[4];
+	y = (transformation[2] * initialX + transformation[3] * initialY) + transformation[5];
+	//return point;
 }
 
 void calculerImage()
 {
 	cout << endl << " << Calculer Image >>" << endl;
 	
+	Pixel ima[tailleX][tailleY];
 	image dataImage[numberOfFilesToRead];
-	for (int i = 0; i < numberOfFilesToRead; i++)
+
+	for (unsigned i = 0; i < numberOfFilesToRead; i++)
 	{
-		ReadImageDataFromFile(fileNamesToRead[i], dataImage[i]);
-		PrintImageData(dataImage[i]);
+		readImageDataFromFile(fileNamesToRead[i], dataImage[i]);
+		printImageData(dataImage[i]);
+
+		/* Fill the image with blank pixels (255) */
+		for (unsigned m = 0; m < tailleX; m++)
+		{
+			for (unsigned n = 0; n < tailleY; n++)
+			{
+				ima[m][n] = 255;
+			}
+		}
+		
+		Point2d *nPoints = new Point2d[dataImage[i].nombrePointsDepart];
+		double *distribution = new double[dataImage[i].extraLignes]; 
+		for (auto o = 0; o < dataImage[i].extraLignes; o++)
+		{
+			distribution[o] = dataImage[i].transformationIFS[o][6]/100;
+		}
+
+		for (auto m = 0; m < dataImage[i].nombrePointsDepart; m++)
+		{
+			// Generer des coordonnees x, y entre 0 et 1 aleatoirement
+			nPoints[m].x = aleatoireZeroUn();
+			nPoints[m].y = aleatoireZeroUn();			
+
+			for (auto n = 0; n < dataImage[i].transformationsDepart; n++)
+			{
+				// Determiner l'indice de la transformation a appliquer, suivant la distribuition aleatoire
+				
+				auto range = aleatoireSelonDistribution(distribution, dataImage[i].extraLignes);
+
+				transformePoint(nPoints[m].x, nPoints[m].y, dataImage[i].transformationIFS[range]);
+				//dessinePoint(nPoints[m].x, nPoints[m].y, dataImage[i].intensite, ima);
+				if (n >= dataImage[i].transformationsAvant)
+				{
+					// Appliquer la transformation d'affichage sur une copie des coordonnees x, y
+					Point2d copyPoint;
+					copyPoint.x = nPoints[m].x;
+					copyPoint.y = nPoints[m].y;
+					transformePoint(copyPoint.x, copyPoint.y, dataImage[i].transformation);
+
+					dessinePoint(copyPoint.x, copyPoint.y, dataImage[i].intensite, ima);					
+				}				
+			}	
+		}
+
+		ecrireImage(ima, dataImage[i].fileName + ".bmp");
+		cout << dataImage[i].fileName << ".bmp generated" << endl;
+
+		delete[] nPoints;
+		delete[] distribution;
 	}
-	
+
 }
 
-void ReadImageDataFromFile(const string fileName, image &image)
+void readImageDataFromFile(const string fileName, image &image)
 {
 	ifstream inputFile;
 	inputFile.open(fileName);
@@ -294,7 +353,7 @@ void ReadImageDataFromFile(const string fileName, image &image)
 	inputFile.close();	
 }
 
-void PrintImageData(image imageToPrint)
+void printImageData(image imageToPrint)
 {
 	cout << "Printing image File Name: " << imageToPrint.fileName << endl;
 	// premiere ligne
