@@ -6,10 +6,20 @@
 #include <sstream>
 #include <string>
 #include <istream>
-//#include <cstdlib>
 
 using namespace std;
+
+/* Constants */
 static constexpr unsigned maxExtraLignesImage = 10;
+static constexpr unsigned numberOfFilesToRead = 5;
+static string fileNamesToRead[numberOfFilesToRead] =
+	{
+		"Barnsley fern.txt",
+		"Golden dragon agrandi.txt",
+		"Golden dragon.txt",
+		"Heighway dragon.txt",
+		"Sierpensky triangle.txt"
+	};
 
 struct image
 {
@@ -215,24 +225,14 @@ Point2d transformePoint(const double x, const double y, const double *transforma
 void calculerImage()
 {
 	cout << endl << " << Calculer Image >>" << endl;
-
-	string fileNames[5] =
+	
+	image dataImage[numberOfFilesToRead];
+	for (int i = 0; i < numberOfFilesToRead; i++)
 	{
-		"Barnsley fern.txt",
-		"Golden dragon agrandi.txt",
-		"Golden dragon.txt",
-		"Heighway dragon.txt",
-		"Sierpensky triangle.txt"
-	};
-
-	image dataImage[5];
-	for (int i = 0; i < 5; i++)
-	{
-		ReadImageDataFromFile(fileNames[i], dataImage[i]);
+		ReadImageDataFromFile(fileNamesToRead[i], dataImage[i]);
 		PrintImageData(dataImage[i]);
 	}
-
-
+	
 }
 
 void ReadImageDataFromFile(const string fileName, image &image)
