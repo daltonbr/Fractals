@@ -23,6 +23,7 @@ static string fileNamesToRead[numberOfFilesToRead] =
 
 struct image
 {
+	string fileName;
 	// première ligne
 	int nombrePointsDepart;
 	int transformationsDepart;
@@ -248,6 +249,8 @@ void ReadImageDataFromFile(const string fileName, image &image)
 	
 	cout << "Reading file " << fileName << endl;
 
+	image.fileName = fileName;
+
 	/* Premiere ligne */
 	inputFile >> image.nombrePointsDepart;
 	inputFile >> image.transformationsDepart;
@@ -293,6 +296,7 @@ void ReadImageDataFromFile(const string fileName, image &image)
 
 void PrintImageData(image imageToPrint)
 {
+	cout << "Printing image File Name: " << imageToPrint.fileName << endl;
 	// premiere ligne
 	cout << imageToPrint.nombrePointsDepart << " "
 		 << imageToPrint.transformationsDepart << " "
