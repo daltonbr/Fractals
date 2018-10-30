@@ -3,6 +3,7 @@
 #include <ctime>
 #include <chrono>
 #include <cstdlib>
+#include <fstream>
 
 using namespace std;
 
@@ -13,12 +14,34 @@ bool estDansIntervalle(const double valeurABorner, const double borneInferieure,
 void dessinePoint(const double x, const double y, const Pixel intensite, Pixel image[][tailleY]);
 double aleatoireZeroUn();
 int aleatoireSelonDistribution(const double *probabilitesCumulatives, int size);
+Point2d transformePoint(const double x, const double y, const double *transformation);
+void calculerImage();
+
+struct image
+{
+	// première ligne
+
+	int nombrePointsDepart;
+	int transformationsDepart;
+	int transformationsAvant;
+	int intensite;
+	// deuxiéme ligne
+	
+	double transformation[6];
+
+	// troisiéme ligne et 
+
+	//double transformation[][7];
+	//int probabiliteCumulative;	
+};
 
 int main()
 {	
 	cout << "Fractales par IFS" << endl;
 
 	test();	
+
+	calculerImage();
 
 	cin.get();
 }
@@ -33,7 +56,7 @@ void test()
 	int borneInferieure = 1;
 	int borneSuperieure = 3;
 
-	cout << "Testing borneDansIntervalle: " << endl;
+	cout << " << Testing borneDansIntervalle >>" << endl;
 	cout << "Expected values: 1 1 1 2 3 3" << endl;
 	cout << "Test values    : ";
 	for (int i = valeurABornerInferieure; i <= valeurABornerSuperieure; i++)
@@ -42,7 +65,7 @@ void test()
 	}
 	cout << endl << endl;
 
-	cout << "Testing estDansIntervalle: " << endl;
+	cout << " << Testing estDansIntervalle >>" << endl;
 	cout << "Expected values: false false true true true false or 0 0 1 1 1" << endl;
 	cout << "Test values    : ";
 	for (int i = valeurABornerInferieure; i <= valeurABornerSuperieure; i++)
@@ -51,7 +74,7 @@ void test()
 	}
 	cout << endl << endl;
 
-	cout << "Testing dessinePoint" << endl;
+	cout << " << Testing dessinePoint >>" << endl;
 
 	/* Fill the image with blank pixels (255) */
 	Pixel image[tailleX][tailleY];
@@ -73,14 +96,13 @@ void test()
 	dessinePoint(30, 20, 128, image);
 
 	ecrireImage(image, "imageTest.bmp");
+	cout << " 'imageTest.bmp' generated" << endl;
 
 	// Test aleatoireSelonDistribution
-	srand(time(nullptr));
+	srand(time_t(NULL));
 	double probabilitesCumulatives[] = { 0.1, 0.35, 1.0 };
 	int size = 3;
-	int occurrencesOfOne = 0;
-	int occurrencesOfZero = 0;
-	int occurrencesOfTwo = 0;
+	int occurrencesOfOne = 0;	
 	for (int i = 0; i < 1000; i++)
 	{
 		int interval = aleatoireSelonDistribution(probabilitesCumulatives, size);
@@ -89,7 +111,14 @@ void test()
 			occurrencesOfOne++;
 		}		
 	}	
-	cout << "Occurrences of the range tested (0.1, 0.35) : " << occurrencesOfOne << endl;	
+	cout << "Occurrences of the range tested (0.1, 0.35) : " << occurrencesOfOne << endl << endl;
+
+	// Test transformePoint
+	cout << " << Testing transformePoint >>" << endl;
+	double transformation[] = { 0.5, -0.5, 0.25, 0.75, 2.0, 3.0 };
+	Point2d point = transformePoint(0.2, 0.7, transformation);
+	cout << "Expected values: x: 1.75, y: 3.575 " << endl;
+	cout << "Test values    : x: " << point.x << ", y: " << point.y << endl;
 }
 
 //! If the valeurABorner is inside the given interval, then returns the unchanged `valeurABorner`, otherwise return the closest limit (borne)
@@ -160,4 +189,41 @@ int aleatoireSelonDistribution(const double *probabilitesCumulatives, int size)
 	}
 	// error, we should get here	
 	return -1;
+}
+
+//! returns a point transformed
+	/*!
+	  \param x point x
+	  \param y point y
+	  \param *transformation un tableau de transformation, it needs to be [3x2], 6 elements
+	  \return returns the transformated point
+	*/
+Point2d transformePoint(const double x, const double y, const double *transformation)
+{	
+	Point2d point;
+	point.x = (transformation[0] * x + transformation[1] * y) + transformation[4];
+	point.y = (transformation[2] * x + transformation[3] * y) + transformation[5];
+	return point;
+}
+
+void calculerImage()
+{
+	cout << " << Calculer Image >>" << endl;
+	ifstream inFile("\\Golden\ dragon.txt");
+//	inFile.open("\\Golden\ dragon.txt");
+
+	if (!inFile)
+	{
+		cerr << "Unable to open file";
+		//exit(1);
+	}
+
+	image image1;
+	while (inFile)
+	{
+		cin >> image1.nombrePointsDepart;
+		cin >> image1.transformationsDepart;
+		cin >> image1.transformationsAvant;
+		cin >> image1.intensite;
+	}
 }
