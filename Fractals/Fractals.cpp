@@ -2,12 +2,31 @@
 #include <iostream>
 #include <ctime>
 #include <chrono>
-#include <cstdlib>
 #include <fstream>
+#include <sstream>
+#include <string>
+#include <istream>
+//#include <cstdlib>
 
 using namespace std;
+static constexpr unsigned maxExtraLignesImage = 10;
+
+struct image
+{
+	// première ligne
+	int nombrePointsDepart;
+	int transformationsDepart;
+	int transformationsAvant;
+	int intensite;
+	// deuxiéme ligne	
+	double transformation[6];
+	// troisiéme ligne et suivant
+	double transformationIFS[maxExtraLignesImage][7];
+	int extraLignes;
+};
 
 /* Headers - entête*/
+
 void test();
 double borneDansIntervalle(const double valeurABorner, const double borneInferieure, const double borneSuperieure);
 bool estDansIntervalle(const double valeurABorner, const double borneInferieure, const double borneSuperieure);
@@ -17,23 +36,10 @@ int aleatoireSelonDistribution(const double *probabilitesCumulatives, int size);
 Point2d transformePoint(const double x, const double y, const double *transformation);
 void calculerImage();
 
-struct image
-{
-	// première ligne
+/* Auxiliary methods */
+void ReadImageDataFromFile(const string fileName, image &image);
+void PrintImageData(image imageToPrint);
 
-	int nombrePointsDepart;
-	int transformationsDepart;
-	int transformationsAvant;
-	int intensite;
-	// deuxiéme ligne
-	
-	double transformation[6];
-
-	// troisiéme ligne et 
-
-	//double transformation[][7];
-	//int probabiliteCumulative;	
-};
 
 int main()
 {	
@@ -154,7 +160,7 @@ void dessinePoint(const double x, const double y, const Pixel intensite, Pixel i
 	if (x < 0 || x > tailleX - 1) return;
 	if (y < 0 || y > tailleY - 1) return;
 
-	image[(unsigned)x][(unsigned)y] = borneDansIntervalle(image[(unsigned)x][(unsigned)y]-intensite, 0, 255);
+	image[(unsigned)x][(unsigned)y] = (Pixel)borneDansIntervalle(image[(unsigned)x][(unsigned)y]-intensite, 0, 255);
 }
 
 /* returns an uniform distribution between 0.0 and 1.0 (excluded) */
@@ -208,22 +214,105 @@ Point2d transformePoint(const double x, const double y, const double *transforma
 
 void calculerImage()
 {
-	cout << " << Calculer Image >>" << endl;
-	ifstream inFile("\\Golden\ dragon.txt");
-//	inFile.open("\\Golden\ dragon.txt");
+	cout << endl << " << Calculer Image >>" << endl;
 
-	if (!inFile)
+	string fileNames[5] =
 	{
-		cerr << "Unable to open file";
-		//exit(1);
+		"Barnsley fern.txt",
+		"Golden dragon agrandi.txt",
+		"Golden dragon.txt",
+		"Heighway dragon.txt",
+		"Sierpensky triangle.txt"
+	};
+
+	image dataImage[5];
+	for (int i = 0; i < 5; i++)
+	{
+		ReadImageDataFromFile(fileNames[i], dataImage[i]);
+		PrintImageData(dataImage[i]);
 	}
 
-	image image1;
-	while (inFile)
+
+}
+
+void ReadImageDataFromFile(const string fileName, image &image)
+{
+	ifstream inputFile;
+	inputFile.open(fileName);
+
+	if (!inputFile)
 	{
-		cin >> image1.nombrePointsDepart;
-		cin >> image1.transformationsDepart;
-		cin >> image1.transformationsAvant;
-		cin >> image1.intensite;
+		cerr << "Unable to open file " << fileName;
+		exit(1);
 	}
+	
+	cout << "Reading file " << fileName << endl;
+
+	/* Premiere ligne */
+	inputFile >> image.nombrePointsDepart;
+	inputFile >> image.transformationsDepart;
+	inputFile >> image.transformationsAvant;
+	inputFile >> image.intensite;
+
+	/* Deuxieme ligne */
+	inputFile >> image.transformation[0];
+	inputFile >> image.transformation[1];
+	inputFile >> image.transformation[2];
+	inputFile >> image.transformation[3];
+	inputFile >> image.transformation[4];
+	inputFile >> image.transformation[5];
+
+	/* Troisieme et suivant lignes */
+	image.extraLignes = 0;
+
+	/* Reading a newline */
+	string lineTemp;
+	getline(inputFile, lineTemp);
+
+	int i = 0;
+	while (!inputFile.eof())
+	{
+		int j = 0;
+		string line;
+		getline(inputFile, line);		
+		if (line.empty()) break;
+
+		stringstream ssin(line);
+		while (ssin.good() && j < 7)
+		{
+			ssin >> image.transformationIFS[i][j];
+			ssin.clear();
+			j++;
+		}
+		i++;
+		if (image.extraLignes <= i) { image.extraLignes = i; }
+	}
+
+	inputFile.close();	
+}
+
+void PrintImageData(image imageToPrint)
+{
+	// premiere ligne
+	cout << imageToPrint.nombrePointsDepart << " "
+		 << imageToPrint.transformationsDepart << " "
+		 << imageToPrint.transformationsAvant << " "
+		 << imageToPrint.intensite << endl;
+	// deuxieme ligne	
+	cout << imageToPrint.transformation[0] << " "
+		 << imageToPrint.transformation[1] << " "
+		 << imageToPrint.transformation[2] << " "
+		 << imageToPrint.transformation[3] << " "
+		 << imageToPrint.transformation[4] << " "
+		 << imageToPrint.transformation[5] << endl;
+	/* Printing the transformationIFS */
+	for (int i = 0; i < imageToPrint.extraLignes; i++)
+	{
+		for (int j = 0; j < 7; j++)
+		{
+			cout << imageToPrint.transformationIFS[i][j] << " ";
+		}
+		cout << endl;
+	}
+	cout << endl;
 }
